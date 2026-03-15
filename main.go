@@ -64,7 +64,7 @@ func run() error {
 		return err
 	}
 
-	targetKeys := collectTodayMessageKeys(schedules, now)
+	targetKeys := collectTargetKeys(schedules, now, os.Getenv("MANUAL_MESSAGE_KEYS"))
 	if len(targetKeys) == 0 {
 		fmt.Printf("no message scheduled for %s\n", now.Format("2006-01-02"))
 		return nil
@@ -197,6 +197,38 @@ func collectTodayMessageKeys(schedules map[string]scheduleEntry, now time.Time) 
 			seen[key] = struct{}{}
 			result = append(result, key)
 		}
+	}
+	return result
+}
+
+func collectTargetKeys(schedules map[string]scheduleEntry, now time.Time, manualKeys string) []string {
+	if keys := splitCSV(manualKeys); len(keys) > 0 {
+		return uniqueKeys(keys)
+	}
+	return collectTodayMessageKeys(schedules, now)
+}
+
+func splitCSV(value string) []string {
+	parts := strings.Split(value, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
+}
+
+func uniqueKeys(keys []string) []string {
+	seen := make(map[string]struct{}, len(keys))
+	result := make([]string, 0, len(keys))
+	for _, key := range keys {
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		result = append(result, key)
 	}
 	return result
 }

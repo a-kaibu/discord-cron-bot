@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 15 * * *"
   workflow_dispatch:
+    inputs:
+      message_keys:
+        description: "Send specific message key(s), comma-separated. Example: bd1,bd2"
+        required: false
+        type: string
 
 jobs:
   send-discord-message:
@@ -16,6 +21,7 @@ jobs:
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
       ACTIONS_VARS_JSON: ${{ toJson(vars) }}
       ACTIONS_SECRETS_JSON: ${{ toJson(secrets) }}
+      MANUAL_MESSAGE_KEYS: ${{ inputs.message_keys }}
     steps:
       - uses: actions/checkout@v4
 

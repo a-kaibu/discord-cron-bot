@@ -1,0 +1,27 @@
+name: discord-cron
+
+on:
+  schedule:
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+
+jobs:
+  send-discord-message:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      TZ: Asia/Tokyo
+      CONFIG_FILE: config.json
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      ACTIONS_VARS_JSON: ${{ toJson(vars) }}
+      ACTIONS_SECRETS_JSON: ${{ toJson(secrets) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run bot
+        run: go run .
